@@ -1,6 +1,6 @@
 # Hardware Concurrency, Memory Models & Lock-Free Design
 
-A 12-member student research and engineering project on how concurrent C++ code interacts with CPU execution, memory ordering, caches and synchronization primitives. Phase 1 produced research notes and small compiler/assembly experiments. Phase 2 ("From Theory to Silicon Proof") produced a store-buffering stress test, a measured false-sharing benchmark, a mutex/spinlock/atomic contention benchmark, and a ring-buffer report. This README states what the repository contains, what is backed by code and data, and what is not (see [§13](#13-limitations--known-gaps)).
+A 12-member student research and engineering project on how concurrent C++ code interacts with CPU execution, memory ordering, caches and synchronization primitives. Phase 1 produced research notes (CPU execution, x86-64 and ARM/AArch64 memory models, cache coherence, locks, ring buffers) and small compiler/assembly experiments. Phase 2 ("From Theory to Silicon Proof") produced two store-buffering experiments, a measured false-sharing benchmark, a mutex/spinlock/atomic contention benchmark, and a ring-buffer report. This README states what the repository contains, what is backed by code and data, and what is not (see [§13](#13-limitations--known-gaps)).
 
 > Scope note: this README was written from an audit of the repository contents. Anything not found in the repository is marked as such rather than assumed.
 
@@ -57,7 +57,7 @@ Performance
 | Problem | Where it appears in this repository |
 |---|---|
 | Race conditions / lost updates | Non-atomic counter examples in [`Task-10` report](Task-10/Ring_Buffer_LMAX_Disruptor_Final_Report.pdf) §9.1 and [`task-8/research.md`](task-8/research.md) |
-| Visibility / unexpected ordering | Store-buffering stress test, [`Task-4`](Task-4/store-buffering-stress-test.cpp); release/acquire vs relaxed notes in [`Task-2`](Task-2/cpu-reordering.pdf) |
+| Visibility / unexpected ordering | Store-buffering stress test, [`Task-4`](Task-4/store-buffering-stress-test.cpp); store-buffering litmus test with raw data, [`Task5`](Task5-ARM_AArch-Memory-Model/README.md); release/acquire vs relaxed notes in [`Task-2`](Task-2/cpu-reordering.pdf) |
 | Cache contention, false sharing | Measured benchmark in [`Task-7`](Task-7/README.md) |
 | Synchronization overhead | Mutex vs spinlock vs atomic counter in [`task-8`](task-8/analysis.md) |
 | Lock-free design, latency/throughput | SPSC ring buffer and queue comparison reported in the [`Task-10` report](Task-10/Ring_Buffer_LMAX_Disruptor_Final_Report.pdf) |
@@ -72,15 +72,15 @@ Topics below are represented by files in the repository.
 | Area | Topics | Location |
 |---|---|---|
 | CPU execution | Pipelining, hazards (RAW/WAR/WAW), register renaming, forwarding, superscalar, out-of-order execution, reorder buffer/retirement, speculation, branch prediction; compiler optimisation vs CPU scheduling | [`Task-2`](Task-2/) |
-| Memory ordering | Relaxed / acquire / release / acq_rel / seq_cst, happens-before, fences, store buffering | [`Task-2`](Task-2/notes.md), [`Task-4`](Task-4/x86-memory-model.md) |
-| Architecture | x86-64 TSO, `MFENCE`/`LFENCE`/`SFENCE`, locked operations, C++ order → x86 assembly mapping, MP and IRIW litmus tests | [`Task-4`](Task-4/) |
+| Memory ordering | Memory-model concepts, relaxed / acquire / release / acq_rel / seq_cst, happens-before, fences, store buffering | [`Task-2`](Task-2/notes.md), [`Task-4`](Task-4/x86-memory-model.md), [`Task5`](Task5-ARM_AArch-Memory-Model/README.md) |
+| Architecture | x86-64 TSO, `MFENCE`/`LFENCE`/`SFENCE`, locked operations, C++ order → x86 assembly mapping, MP and IRIW litmus tests; ARM/AArch64 weak ordering, `DMB`/`DSB`/`ISB`, `LDAR`/`STLR` (concepts only, not run on ARM) | [`Task-4`](Task-4/), [`Task5`](Task5-ARM_AArch-Memory-Model/) |
 | Cache coherence | MESI, MOESI, MESIF/MOESIF/PMESI, snooping vs directory (literature review) | [`Task - 6.pdf`](Task%20-%206.pdf) |
 | Synchronization | Mutex, spinlock, blocking, context switching, contention, CPU utilisation | [`task-8`](task-8/) |
 | False sharing | Packed vs 64-byte padded vs truly shared counters | [`Task-7`](Task-7/) |
 | Data structures | Ring buffer, SPSC/MPSC/MPMC, LMAX Disruptor concepts, waiting strategies | [`Task-10`](Task-10/Ring_Buffer_LMAX_Disruptor_Final_Report.pdf) |
 | Performance | Benchmark methodology, warm-up, repetitions, percentiles, CPU frequency/thermal/affinity/NUMA (as a methodology document) | [`Task-11`](Task-11/) |
 
-**Not found in the repository:** ARM/AArch64 memory-model material (only a one-sentence comparison in `Task-2/notes.md`), invalidate queues, load buffers, a CAS-loop implementation, ABA, wait-free algorithms, NUMA experiments, thermal or frequency measurements.
+**Not found in the repository:** ARM/AArch64 code, assembly or measurements (`Task5` covers concepts only), invalidate queues, load buffers, a CAS-loop implementation, ABA, wait-free algorithms, NUMA experiments, thermal or frequency measurements.
 
 ---
 
@@ -102,6 +102,11 @@ Topics below are represented by files in the repository.
 - [`x86-memory-litmus-tests.cpp`](Task-4/x86-memory-litmus-tests.cpp): MP and IRIW function definitions (illustrations, not a harness).
 - [`x86-64-memory-ordering-comparison-table.csv`](Task-4/x86-64-memory-ordering-comparison-table.csv), [`REVIEW-AND-CORRECTIONS.md`](Task-4/REVIEW-AND-CORRECTIONS.md), [`REAADME.md`](Task-4/REAADME.md) (file name as committed).
 
+### Memory-model concepts and ARM/AArch64 — [`Task5-ARM_AArch-Memory-Model/`](Task5-ARM_AArch-Memory-Model/)
+- [`README.md`](Task5-ARM_AArch-Memory-Model/README.md) Part 1: what a memory model is and why it matters, a shared-whiteboard analogy, ARM/AArch64 as a weak/relaxed model, the ordering instructions (`DMB`, `DSB`, `ISB`, `LDAR`, `STLR`, `LDAXR`, `STLXR`), a caution against equating ARM with PSO/RCsc/RCpc, a comparison table of ARM/AArch64, x86-64 and an "ideal" model, and a suggested study order for AArch64.
+- Four diagrams in [`images/diagrams/`](Task5-ARM_AArch-Memory-Model/images/diagrams/): the big picture, why reordering matters, acquire/release, ARM barriers.
+- The text is mirrored from an external Notion page. The `Memory_Model_Dark.docx` listed in its layout is not in the repository. The ARM material cites no sources, and there is no ARM assembly or ARM-hardware run. The experiment in Part 2 is covered in [§5.1](#51-race--memory-ordering-poc).
+
 ### Cache coherence — [`Task - 6.pdf`](Task%20-%206.pdf)
 A 7-page literature review of MESI/MOESI and variants: state definitions, snooping vs directory, twelve true/false verified cases, read-miss walkthrough, reported results from cited studies. It contains no code or measurements of its own.
 
@@ -122,12 +127,21 @@ Summary against the four mandate items:
 
 | # | Requirement | Repository evidence | Status |
 |---|---|---|---|
-| 1 | Prove the race in code | Runnable store-buffering test (memory ordering). Data-race lost-update programs exist only as listings in documents. | 🟡 Partial |
+| 1 | Prove the race in code | Two runnable store-buffering experiments (memory ordering); `Task5` commits raw data and figures. Data-race lost-update programs exist only as listings in documents. `Task5` hardware is unrecorded and its controls were not run. | ✅ Complete (memory-ordering variant) |
 | 2 | Benchmark false sharing | Runnable benchmark with raw data, graph and environment record | ✅ Complete |
 | 3 | Build a lock-free construct | SPSC ring buffer exists only as a listing in a PDF; no CAS loop; no executable source or tests | 🟡 Partial |
 | 4 | 100% team knowledge transfer | Q&A checklist for one member; no evidence for the other eleven | 🟡 Partial |
 
 ### 5.1 Race / Memory Ordering PoC
+
+**Store-buffering litmus test with raw data (runnable)** — [`Task5-ARM_AArch-Memory-Model/src/ordering_modified.cpp`](Task5-ARM_AArch-Memory-Model/src/ordering_modified.cpp)
+- C++ with pthreads, adapted (per its README) from Jeff Preshing's *Memory Reordering Caught in the Act*. Thread 1 runs `X = 1; r1 = Y` and thread 2 runs `Y = 1; r2 = X`. For every run the main thread resets both variables to 0 and releases both threads through semaphores, so each run is a paired litmus iteration. `r1 == 0 && r2 == 0` is impossible under sequential consistency.
+- Only a compiler barrier (`asm volatile("" ::: "memory")`) separates each store from its load, so any reordering comes from the CPU. Threads are pinned to logical CPUs 0 and 2 and start after a random delay.
+- Setup: 200,000 untimed warm-up runs, then 1,000,000 measured runs.
+- Committed result: **86 reorders in 1,000,000 runs (0.0086%) in 7.814 s**, a mean of 11.3 per complete second (range 6–17). Raw data: [`scripts/reorders_vs_runs.txt`](Task5-ARM_AArch-Memory-Model/scripts/reorders_vs_runs.txt) and [`scripts/reorders_per_second.txt`](Task5-ARM_AArch-Memory-Model/scripts/reorders_per_second.txt); figures in [`images/output/`](Task5-ARM_AArch-Memory-Model/images/output/).
+- Not run: the two controls its README expects to give zero reorders (`USE_CPU_FENCE=1` with `mfence`, and `USE_SINGLE_HW_THREAD=1`). The "Actual output" block in its README is reconstructed from the data file, not a captured console log.
+- CPU, OS and compiler are not recorded. The committed Figure 1 is a screenshot of a Windows-style matplotlib window and the source comments describe Windows SMT numbering, but the README does not state the platform. It was not run on ARM despite the folder name.
+- `X`, `Y`, `r1` and `r2` are plain `int`s, so the program is formally a data race in C++. It is a deliberate hardware-level litmus test, not portable C++.
 
 **Store-buffering stress test (runnable)** — [`Task-4/store-buffering-stress-test.cpp`](Task-4/store-buffering-stress-test.cpp)
 - C++20, two threads with relaxed atomics. Each thread stores to its own variable, then loads the other's; the main thread samples whether both loads saw `0` (`r0 == 0 && r1 == 0`), an outcome impossible under sequential consistency but allowed on x86-64 TSO.
@@ -190,6 +204,7 @@ A second, independent false-sharing figure appears in the Task-10 report (see [�
 | Experiment | Hypothesis | Implementation | Measurement | Result |
 |---|---|---|---|---|
 | Store buffering | x86-64 allows a load to pass an older store to a different address | [`Task-4/store-buffering-stress-test.cpp`](Task-4/store-buffering-stress-test.cpp), runnable | `r0==0 && r1==0` count over 200,000 samples | Reported 31,822 (~16%); output not committed |
+| Store-buffering litmus (Task5) | Same, with paired, synchronised rounds | [`Task5-ARM_AArch-Memory-Model/src/ordering_modified.cpp`](Task5-ARM_AArch-Memory-Model/src/ordering_modified.cpp), runnable | `r1==0 && r2==0` count over 1,000,000 runs, CPUs 0 and 2, compiler barrier only | 86 reorders (0.0086%) in 7.814 s; raw data and figures committed; controls not run; hardware not recorded |
 | Race PoC (lost updates) | Unsynchronised increments lose updates | Listings only: Task-10 PDF §9.1, `task-8/research.md` | 4 threads × 1M (PDF, 5 runs); 2 threads × 1M (notes, 3 runs) | All recorded totals below expected; no source file or raw output in repo |
 | Release/acquire vs relaxed | Relaxed gives no synchronisation with `data` | [`Task-2/experiment4.cpp`](Task-2/experiment4.cpp), [`4b`](Task-2/experiment4b.cpp) | Printed value of `data` | Both print 42; no difference shown (the PDF says so) |
 | False sharing (Task-7) | Padding to 64 B removes cache-line bouncing | [`Task-7/false-sharing.cpp`](Task-7/false-sharing.cpp) | Median Mops/s, 7 runs, 1–9 threads, pinned | Padded/packed 3.50× at 4 threads, 9.62× at 8; 0.96× and 0.89× at 1 and 2; packed ≈ true shared at 8 (43.4 vs 43.8) |
@@ -197,6 +212,8 @@ A second, independent false-sharing figure appears in the Task-10 report (see [�
 | Mutex / spinlock / atomic | Contention hurts spinlocks most | [`task-8/locking-benchmark.cpp`](task-8/locking-benchmark.cpp) | Mean time (ms) of 4 runs, 1M increments/thread, 1–8 threads | At 8 threads: mutex 558.75, spinlock 1572.00, atomic 119.50 ms (see data caveat below) |
 | CAS | — | Not found in the repository | — | — |
 | Ring buffer (reported) | SPSC ring has less overhead than a mutex queue | Listing only: Task-10 PDF §9.4 | 5M messages, 3 runs, checksum | Reported medians 12.055 vs 84.163 Mops/s (≈6.98×); checksums matched; no source or CSV in repo |
+
+**Two store-buffering results.** `Task-4` reports ~16% (31,822 of 200,000) from a free-running sampler. `Task5` reports 0.0086% (86 of 1,000,000) from paired, semaphore-synchronised rounds with pinned threads, about 1,800× lower. The harnesses measure different things and neither records the CPU, so the two figures should not be compared. A spot-check of the `Task5` program on a 2-vCPU VM (which cannot pin to CPU 2) found 2 reorders in 1,000,000 runs.
 
 **Data caveat for `task-8`.** [`result.csv`](task-8/result.csv) has 42 of the 48 expected rows (run 3 at 1 thread and run 2 at 8 threads are absent). Averages in [`analysis.md`](task-8/analysis.md) for 2 and 4 threads match the CSV. The 1-thread and 8-thread averages do not: for example, at 8 threads the CSV gives mutex 567.33, spinlock 1666.33, atomic 122.33 ms (3 runs each) against 558.75, 1572.00, 119.50 in the analysis. The ordering (atomic < mutex < spinlock at 8 threads) holds either way.
 
@@ -213,13 +230,14 @@ Backed by code and data in this repository.
 - GCC (x86-64, `-O2`) emits plain `MOV` for relaxed/acquire loads and relaxed/release stores, `XCHG` for a `seq_cst` store and `LOCK XADD` for `fetch_add` ([`Task-4`](Task-4/x86-atomics-gcc14-x86_64.s)). This is a compiler observation, not an architectural guarantee.
 - `-O2` can remove work or branches before the CPU sees them (constant folding, `cmov`) ([`Task-2`](Task-2/)).
 - In the task-8 benchmark (Windows, i5-13500H), atomic increment was fastest and the spinlock slowest at 8 threads.
-- The store-buffering outcome is observable on real hardware (reported in `Task-4`; reproducible from the committed source, though the rate varies by machine).
+- The store-buffering outcome (`r1 == 0 && r2 == 0`) is observable on real hardware, and a compiler barrier alone does not prevent it: 86 times in 1,000,000 paired runs in [`Task5`](Task5-ARM_AArch-Memory-Model/README.md) (raw data committed) and ~16% of samples in the `Task-4` stress test (output not committed). The rate differs by orders of magnitude between harnesses and machines.
 
 ### Research-supported
 Supported by cited sources, not experimentally demonstrated here.
 
 - x86-64 is TSO: store→load reordering is allowed, other reorderings are not; `LFENCE` serialises instruction execution rather than ordering memory visibility ([`Task-4`](Task-4/x86-memory-model.md)).
 - Release/acquire creates a happens-before relationship; relaxed does not ([`Task-2`](Task-2/notes.md), `Task-4`).
+- ARM/AArch64 is weakly ordered and uses `DMB`/`DSB`/`ISB` and `LDAR`/`STLR` for ordering. The `Task5` README says a similar test on ARM would be expected to show more reordering, and states that this is an expectation, not a measurement.
 - MESI has four states; MOESI adds Owned; reported gains of MOESI and variants come from specific simulation studies and should not be generalised ([`Task - 6.pdf`](Task%20-%206.pdf)).
 - Compiler optimisation, out-of-order execution and memory ordering are separate mechanisms ([`Task-2`](Task-2/cpu-reordering.pdf)).
 - Spinlocks burn CPU while waiting; mutexes block and pay scheduling cost ([`task-8/research.md`](task-8/research.md)).
@@ -233,7 +251,7 @@ Needs additional experiments or files.
 - The ≈4.31× false-sharing result on AMD EPYC and why it differs from Task-7's 0.89× at 2 threads (different hardware, thread pinning and run length; not investigated).
 - That cache-line transfers cause the false-sharing slowdown (`perf c2c` not run; the mechanism is inferred from layout changes only).
 - Any relaxed-ordering failure (no reordering outcome from `data`/`ready` was produced).
-- Behaviour on ARM/AArch64, CAS contention, ABA, MPSC/MPMC.
+- Behaviour on ARM/AArch64 (concepts only; no ARM run or assembly), that `mfence` removes the reordering in the `Task5` program (control not run), CAS contention, ABA, MPSC/MPMC.
 
 ---
 
@@ -241,6 +259,7 @@ Needs additional experiments or files.
 
 ```text
 Hardware-Concurrency-Memory-Models-Lock-Free-Design/
+├── README.md                         # this file
 ├── Task - 6.pdf                      # MESI/MOESI literature review (7 pages)
 ├── Task-2/                           # CPU reordering, ILP, compiler vs CPU, release/acquire
 │   ├── notes.md, cpu-reordering.pdf  # notes and 25-page write-up
@@ -254,6 +273,11 @@ Hardware-Concurrency-Memory-Models-Lock-Free-Design/
 │   ├── x86-atomics.cpp, x86-atomics-gcc14-x86_64.s
 │   ├── x86-memory-litmus-tests.cpp, store-buffering-stress-test.cpp
 │   └── x86-64-memory-ordering-comparison-table.csv
+├── Task5-ARM_AArch-Memory-Model/     # memory-model concepts, ARM/AArch64, store-buffering litmus test
+│   ├── README.md
+│   ├── src/ordering_modified.cpp
+│   ├── scripts/                      # plot_reorders.py, requirements.txt, reorders_vs_runs.txt, reorders_per_second.txt
+│   └── images/                       # diagrams/ (4 PNG), output/ (2 PNG)
 ├── Task-7/                           # False-sharing benchmark
 │   ├── false-sharing.cpp, run-benchmark.sh, analyze.py, requirements.txt, .gitignore
 │   ├── README.md, false-sharing-results.md, RESEARCH.md
@@ -270,21 +294,21 @@ Hardware-Concurrency-Memory-Models-Lock-Free-Design/
     └── research/cpu-and-hardware-concurrency.md
 ```
 
-There are no folders for Tasks 1, 3, 5, 9 or 12, and no top-level build system, test directory or CI configuration.
+There are no folders for Tasks 1, 3, 9 or 12, and no top-level build system, test directory or CI configuration. Task 5's folder is named `Task5-ARM_AArch-Memory-Model`, not `Task-5`.
 
 ---
 
 ## 9. Team Contributions
 
-Folders and commit messages use member numbers (`member-2`, `member-4`, "Member 11", "Member 10 — Ananya Narula" in the PDF). Numbers 1–12 follow the roster order below; the member-to-folder link is explicit for Members 2, 4, 10 and 11 and inferred from roster order plus commit author for Members 6, 7 and 8. The commit author name or GitHub handle is given where it differs from the roster name.
+Folders and commit messages use member numbers (`member-2`, `member-4`, "Member 11", "Member 10 — Ananya Narula" in the PDF). Numbers 1–12 follow the roster order below; the member-to-folder link is explicit for Members 2, 4, 10 and 11 and inferred from roster order plus commit author for Members 5, 6, 7 and 8. Task 5's commit came from the handle `Glazybyte`, which matches no roster name, so that attribution rests on the folder number alone. The commit author name or GitHub handle is given where it differs from the roster name.
 
 | Member | Phase 1 Area | Phase 2 Work | Key Artifact |
 |---|---|---|---|
 | Khushi Kumari | Not verifiable from repository. | Not verifiable from repository. | — |
-| Pushparaj Singh | CPU execution, compiler vs OoO, memory-ordering notes (`Task-2`). Also committed the Task-10 PDF and the folder renames. | Release/acquire vs relaxed example (source only). Repository owner. | [`Task-2/cpu-reordering.pdf`](Task-2/cpu-reordering.pdf), [`notes.md`](Task-2/notes.md) |
+| Pushparaj Singh | CPU execution, compiler vs OoO, memory-ordering notes (`Task-2`). | Release/acquire vs relaxed example (source only). Repository owner. | [`Task-2/cpu-reordering.pdf`](Task-2/cpu-reordering.pdf), [`notes.md`](Task-2/notes.md) |
 | Anand Kumar Sahni | Not verifiable from repository. | Not verifiable from repository. | — |
 | Anshul Prajapati (`Anshul036`) | x86-64 memory model, fences, litmus tests, C++→assembly mapping | Store-buffering stress test | [`Task-4/x86-memory-model.md`](Task-4/x86-memory-model.md), [`store-buffering-stress-test.cpp`](Task-4/store-buffering-stress-test.cpp) |
-| Devansh Vinayak | Not verifiable from repository. | Not verifiable from repository. | — |
+| Devansh Vinayak (inferred; committed as `Glazybyte`) | Memory-model concepts, ARM/AArch64 ordering overview, diagrams | Store-buffering litmus test with raw data and plots (not run on ARM) | [`Task5-ARM_AArch-Memory-Model/README.md`](Task5-ARM_AArch-Memory-Model/README.md), [`src/ordering_modified.cpp`](Task5-ARM_AArch-Memory-Model/src/ordering_modified.cpp) |
 | Gagan Chaurasia | MESI/MOESI cache coherence review (uploaded the PDF; folder number inferred) | Not verifiable from repository. | [`Task - 6.pdf`](Task%20-%206.pdf) |
 | Harsh Gupta (`Harsh`) | False sharing and cache-line bouncing research | False-sharing benchmark, analysis script, raw data, graph | [`Task-7/`](Task-7/) |
 | Paras Gupta (`paras gupta`, `Astro-peek`) | Mutex, spinlock, contention research | Mutex/spinlock/atomic contention benchmark (Windows) | [`task-8/analysis.md`](task-8/analysis.md), [`locking-benchmark.cpp`](task-8/locking-benchmark.cpp) |
@@ -293,7 +317,7 @@ Folders and commit messages use member numbers (`member-2`, `member-4`, "Member 
 | Chhavi Sharma | Performance-engineering methodology, hardware-concurrency introduction | Benchmark template (header only); no benchmark data collected | [`Task-11/methodology/benchmark-methodology.md`](Task-11/methodology/benchmark-methodology.md) |
 | Richa Bharti | Not verifiable from repository. | Not verifiable from repository. | — |
 
-Five of twelve members have no identifiable contribution in the repository. This may reflect work stored elsewhere.
+Four of twelve members (Khushi Kumari, Anand Kumar Sahni, Preksha Wani, Richa Bharti) have no identifiable contribution in the repository. This may reflect work stored elsewhere.
 
 ---
 
@@ -308,6 +332,7 @@ cd Hardware-Concurrency-Memory-Models-Lock-Free-Design
 
 ### Requirements
 - Linux or WSL2 for `Task-7` (uses `sched_setaffinity`, `/sys`, `taskset`, `lscpu`, `ldd`); GCC 11+ with C++20.
+- `Task5` needs at least 3 logical CPUs as written (it pins to CPUs 0 and 2), pthreads and POSIX semaphores, and numpy + matplotlib (unpinned) for plotting.
 - Any g++ with `-pthread` for the others. No JDK, no Java, no other dependencies. `matplotlib` only for `Task-7/analyze.py` (pinned to 3.10.8 in `requirements.txt`).
 
 ### Running the false-sharing benchmark (`Task-7`)
@@ -330,6 +355,19 @@ g++ -std=c++20 -O2 -pthread store-buffering-stress-test.cpp -o sb && ./sb
 ```
 
 `N` varies by machine. The documented run reported 31,822; a spot-check on a different VM gave 8,550.
+
+### Running the store-buffering litmus test (`Task5`)
+
+```bash
+cd Task5-ARM_AArch-Memory-Model
+g++ -O2 -pthread src/ordering_modified.cpp -o ordering
+cd scripts
+../ordering                       # writes reorders_vs_runs.txt and reorders_per_second.txt into the current directory
+pip install -r requirements.txt   # numpy, matplotlib
+python plot_reorders.py           # writes reorders_vs_runs.png and reorders_per_second.png, prints the totals
+```
+
+Run it in a copy: it overwrites the committed `.txt` files in `scripts/`. The documented run took 7.8 s on the authors' machine; on a 2-vCPU VM it took 29.8 s, printed "could not pin thread to CPU 2" and found 2 reorders. Change `CORE_THREAD1`/`CORE_THREAD2` or `PIN_THREADS` at the top of the source for a different CPU layout. The committed figures are named `fig1_memory_reordering.png` and `fig2_reorders_per_second.png`, not the names the plot script writes. To try the controls, set `USE_CPU_FENCE` or `USE_SINGLE_HW_THREAD` to 1 in the source.
 
 ### Regenerating the x86 assembly (`Task-4`)
 
@@ -373,25 +411,26 @@ Not found in the repository. The Task-10 PDF (Appendix B) lists build commands f
 
 What each dataset actually recorded:
 
-| Item | Task-7 false sharing (measured) | task-8 locking (measured) | Task-10 report (reported only) | Task-4 stress test (reported only) |
-|---|---|---|---|---|
-| CPU | Xeon Platinum 8573C, KVM, 9 vCPUs (cgroup quota 8), 1 thread/core | i5-13500H, 2.60 GHz | AMD EPYC 9V74, KVM, 5 CPUs | Not recorded ("x86-64 VM") |
-| Cache | 64 B line (sysfs); L1d 240 KiB (5 instances), L2 10 MiB (5), L3 260 MiB | Not recorded | 64 B line | Not recorded |
-| OS | Ubuntu 24.04.3, kernel 6.18.44 | Windows 11 | Linux (x86_64) | Not recorded |
-| Compiler / flags | g++ 13.3.0, `-O3 -std=c++20 -pthread -Wall -Wextra -Wpedantic -DCACHE_LINE_BYTES=64` | MinGW-w64 GCC; version and flags not recorded | GCC 14.2, C++17, `-O2` | GCC 12.2.0, `-O2`, C++20 |
-| Warm-up | 200,000 increments per thread per mode/count | None | One warm-up run | Not stated |
-| Iterations | 10,000,000 per thread | 1,000,000 per thread | 5,000,000 messages (ring); 1 s per layout (false sharing) | 200,000 sampling rounds |
-| Repetitions | 7, shuffled order, fixed seed | 4 | 3 | 1 |
-| Threads | 1, 2, 4, 8, 9, pinned to CPU *i* | 1, 2, 4, 8, not pinned | 2 (false sharing); 1 producer + 1 consumer; not pinned | 2 |
-| Unit / clock | Mops/s; `steady_clock` | Milliseconds (integer); `high_resolution_clock` | Mops/s | Count of outcomes |
-| Statistics | Median, min, max, Q1, Q3 | Mean only | Median | Single count |
-| Raw data in repo | Yes ([`raw.csv`](Task-7/measured-results/raw.csv)) | Partial (42/48 rows) | No | No |
+| Item | Task-7 false sharing (measured) | task-8 locking (measured) | Task5 store buffering (measured) | Task-10 report (reported only) | Task-4 stress test (reported only) |
+|---|---|---|---|---|---|
+| CPU | Xeon Platinum 8573C, KVM, 9 vCPUs (cgroup quota 8), 1 thread/core | i5-13500H, 2.60 GHz | Not recorded | AMD EPYC 9V74, KVM, 5 CPUs | Not recorded ("x86-64 VM") |
+| Cache | 64 B line (sysfs); L1d 240 KiB (5 instances), L2 10 MiB (5), L3 260 MiB | Not recorded | Not recorded | 64 B line | Not recorded |
+| OS | Ubuntu 24.04.3, kernel 6.18.44 | Windows 11 | Not recorded | Linux (x86_64) | Not recorded |
+| Compiler / flags | g++ 13.3.0, `-O3 -std=c++20 -pthread -Wall -Wextra -Wpedantic -DCACHE_LINE_BYTES=64` | MinGW-w64 GCC; version and flags not recorded | Not recorded (README gives `g++ -O2 -pthread`) | GCC 14.2, C++17, `-O2` | GCC 12.2.0, `-O2`, C++20 |
+| Warm-up | 200,000 increments per thread per mode/count | None | 200,000 untimed runs | One warm-up run | Not stated |
+| Iterations | 10,000,000 per thread | 1,000,000 per thread | 1,000,000 measured runs | 5,000,000 messages (ring); 1 s per layout (false sharing) | 200,000 sampling rounds |
+| Repetitions | 7, shuffled order, fixed seed | 4 | 1 | 3 | 1 |
+| Threads | 1, 2, 4, 8, 9, pinned to CPU *i* | 1, 2, 4, 8, not pinned | 2, pinned to CPUs 0 and 2, random start delay | 2 (false sharing); 1 producer + 1 consumer; not pinned | 2 |
+| Unit / clock | Mops/s; `steady_clock` | Milliseconds (integer); `high_resolution_clock` | Reorder count (cumulative per 1,000 runs and per second); `CLOCK_MONOTONIC` | Mops/s | Count of outcomes |
+| Statistics | Median, min, max, Q1, Q3 | Mean only | Counts, rate, mean per second | Median | Single count |
+| Raw data in repo | Yes ([`raw.csv`](Task-7/measured-results/raw.csv)) | Partial (42/48 rows) | Yes ([`reorders_vs_runs.txt`](Task5-ARM_AArch-Memory-Model/scripts/reorders_vs_runs.txt), [`reorders_per_second.txt`](Task5-ARM_AArch-Memory-Model/scripts/reorders_per_second.txt)) | No | No |
 
 **Missing or inconsistent across the project:**
 - Task-11 sets a standard (P50/P90/P95/P99, CPU frequency, temperature, utilisation, affinity, NUMA) that no committed dataset follows. `benchmark-template.csv` has no data rows.
 - CPU frequency, temperature and utilisation were not recorded for any run.
 - `task-8` used no warm-up, no pinning and millisecond resolution (1-thread atomic runs are 5–7 ms).
 - `task-8` compiler version, flags and thread-affinity are not recorded.
+- `Task5` records no CPU, OS or compiler, ran once, and did not run its fence and single-core controls.
 - Task-7 recorded cgroup throttling per run (38 of 105 runs affected) and discloses it.
 
 ---
@@ -399,25 +438,26 @@ What each dataset actually recorded:
 ## 12. Reproducibility
 
 - **Best-documented path:** `Task-7`. Environment, build command, binary hash, raw CSV, log and disassembly are committed; `run-benchmark.sh` regenerates everything and `analyze.py` re-derives the summary. Running `analyze.py` on the committed `raw.csv` reproduces the medians in the table in [§5.2](#52-false-sharing-benchmark).
-- **Expected output:** only `Task-7` has verified expected values, and they depend on the machine. Qualitatively, packed throughput should fall with thread count while padded rises; absolute numbers will differ, especially on a VM with CPU quotas.
+- **Expected output:** only `Task-7` and `Task5` have committed results to compare against, and both depend on the machine. Qualitatively, packed throughput should fall with thread count while padded rises; absolute numbers will differ, especially on a VM with CPU quotas.
 - **Run on bare metal** (or at least without a CPU quota) before drawing hardware conclusions; the authors list `perf c2c record` as the next step.
-- **Raw data locations:** [`Task-7/measured-results/`](Task-7/measured-results/), [`task-8/result.csv`](task-8/result.csv). None for Task-4 or Task-10 results.
-- **Graph generation:** `python3 analyze.py <folder>` in `Task-7`. The `task-8` graphs are committed PNGs with no generating script; they plot the averages from `analysis.md`.
-- **Known limits:** x86-64 only; committed `.exe` files are Windows binaries and are not needed to rebuild; Task-10 numbers cannot be reproduced because the source and CSVs are absent.
+- **Raw data locations:** [`Task-7/measured-results/`](Task-7/measured-results/), [`task-8/result.csv`](task-8/result.csv), [`Task5-ARM_AArch-Memory-Model/scripts/`](Task5-ARM_AArch-Memory-Model/scripts/). None for Task-4 or Task-10 results.
+- **Graph generation:** `python3 analyze.py <folder>` in `Task-7`; `python plot_reorders.py` in `Task5-ARM_AArch-Memory-Model/scripts/`. The `task-8` graphs are committed PNGs with no generating script; they plot the averages from `analysis.md`.
+- **Known limits:** x86-64-class hardware only (no ARM run); committed `.exe` files are Windows binaries and are not needed to rebuild; Task-10 numbers cannot be reproduced because the source and CSVs are absent.
 
 ---
 
 ## 13. Limitations & Known Gaps
 
-- **Phase 2 item 1:** the lost-update race is shown only as document listings with unsaved output; the one runnable ordering demo (store buffering) has no committed raw output and a free-running sampler.
+- **Phase 2 item 1:** the lost-update race is shown only as document listings with unsaved output. The memory-ordering demos are runnable: `Task5` commits raw data but not its controls or hardware details, and `Task-4` has no committed raw output and a free-running sampler.
 - **Phase 2 item 3:** no CAS loop; the SPSC ring buffer has no executable source, no tests and no committed measurements. The Task-10 appendix lists files as "included" that are absent from the repository.
 - **Phase 2 item 4:** KT evidence exists for Member 10 only (a question list); none for the others.
 - **Benchmarks:** only Task-7 meets its own standard. `task-8` has an incomplete CSV and averages that disagree with it for 1 and 8 threads. No dataset records P90/P95/P99, frequency or temperature.
-- **Hardware evidence:** Task-7 ran on a throttled VM with no hardware counters. Task-10 ran on a different VM with unpinned threads. No bare-metal data, no perf/HITM data, no ARM data.
+- **Hardware evidence:** Task-7 ran on a throttled VM with no hardware counters. Task-10 ran on a different VM with unpinned threads. `Task5` and `Task-4` do not record their hardware. No bare-metal data, no perf/HITM data, no ARM data.
 - **Conflicting results:** padding helps 9.6× at 8 threads in Task-7 but did not help at 2 threads (0.89×); the Task-10 report claims 4.31× at 2 threads on other hardware. No experiment reconciles these.
+- **Conflicting store-buffering rates:** `Task-4` reports ~16% and `Task5` 0.0086%, about 1,800× apart. The harnesses and machines differ and nothing reconciles them.
 - **Experiment depth:** `Task-2` atomics experiment shows no failure for relaxed ordering; `Task-4` litmus tests (MP, IRIW) are definitions, not run harnesses.
-- **Coverage:** no work from five roster members is identifiable; no folders for Tasks 1, 3, 5, 9, 12; ARM/AArch64, ABA, wait-free, MPMC are not covered in code or notes.
-- **Document quality:** `Task-11/research/cpu-and-hardware-concurrency.md` is truncated; `Task-4/REAADME.md` has a misspelt file name; `Task-2/notes.md` contains Obsidian image links (`![[Pasted image …]]`) whose images are not in the repository; the Task-6 references are aggregator links (Consensus), some with truncated titles.
+- **Coverage:** no work from four roster members is identifiable, and Task 5's attribution is inferred; no folders for Tasks 1, 3, 9, 12. ARM/AArch64 is concepts only (no ARM code, assembly or run). ABA and wait-free algorithms are not covered anywhere; CAS loops and MPSC/MPMC implementations are absent.
+- **Document quality:** `Task-11/research/cpu-and-hardware-concurrency.md` is truncated; `Task-4/REAADME.md` has a misspelt file name; `Task-2/notes.md` contains Obsidian image links (`![[Pasted image …]]`) whose images are not in the repository; the Task-6 references are aggregator links (Consensus), some with truncated titles. The `Task5` README lists a `Memory_Model_Dark.docx` that is absent, cites no sources for its ARM section, links an external Notion page, and quotes a throughput range (110,000–137,000 runs/s) that does not match its own per-second data (88,165–136,965 in complete seconds).
 - **Repository hygiene:** Windows `.exe` files are committed in `Task-2` and `task-8`.
 
 ---
@@ -426,7 +466,8 @@ What each dataset actually recorded:
 
 Each lesson is tied to the team's own work.
 
-- **Source order is not the whole execution story.** `-O2` folded a call to a constant and replaced a branch with `cmov` ([`Task-2`](Task-2/)); on x86-64 a load can pass an earlier store, and the store-buffering test observed it ([`Task-4`](Task-4/)).
+- **Source order is not the whole execution story.** `-O2` folded a call to a constant and replaced a branch with `cmov` ([`Task-2`](Task-2/)); on x86-64 a load can pass an earlier store, and the store-buffering tests observed it ([`Task-4`](Task-4/), [`Task5`](Task5-ARM_AArch-Memory-Model/)).
+- **A compiler barrier is not a CPU fence.** In `Task5` the compiler barrier was in place and the CPU still produced `r1 == 0 && r2 == 0` 86 times in 1,000,000 runs. The matching `mfence` control was not run.
 - **Memory ordering is not cache coherence.** Coherence keeps copies of one location consistent; ordering governs how operations on different locations become visible ([`Task-2/notes.md`](Task-2/notes.md), `Task - 6.pdf`).
 - **A C++ memory order is not an instruction.** Several orders compile to the same x86 instruction, so "it works on x86" says little about portability ([`Task-4`](Task-4/x86-memory-model.md)).
 - **Atomic does not mean fast.** Atomic increments on one cache line performed no better than a truly shared counter at 8 threads ([`Task-7`](Task-7/false-sharing-results.md)).
@@ -434,7 +475,7 @@ Each lesson is tied to the team's own work.
 - **Padding is not free and does not always help.** No gain at 1–2 threads, and 8× the memory for 8 counters.
 - **Contention costs depend on the primitive.** At 8 threads the spinlock was slowest and the atomic fastest in the task-8 workload ([`task-8`](task-8/analysis.md)).
 - **Benchmark method matters.** Pinning, shuffled run order, runtime layout checks, correctness checks and disclosure of CPU throttling shaped how far Task-7 could be trusted; the unrecorded conditions in other datasets limit what they show ([`Task-11`](Task-11/methodology/benchmark-methodology.md)).
-- **Hardware observations need qualification.** VM, quota, compiler and CPU all appear in the authors' own caveats.
+- **Hardware observations need qualification.** VM, quota, compiler and CPU all appear in the authors' own caveats, and two store-buffering harnesses on unrecorded machines gave rates about 1,800× apart.
 - **Not demonstrated by this repository:** "lock-free is faster" and CAS retry cost. The Task-10 report states it does not claim that a ring buffer or the Disruptor is always faster.
 
 ---
@@ -448,6 +489,10 @@ Taken from the repository's documents; see each file for full citations.
 - Owens et al., *A Better x86 Memory Model: x86-TSO* (2009)
 - Intel SDM — `SFENCE`
 - *The Semantics of x86 Multiprocessor Machine Code*
+
+**Memory-model concepts and ARM/AArch64** ([`Task5`](Task5-ARM_AArch-Memory-Model/README.md))
+- Jeff Preshing, *Memory Reordering Caught in the Act* (named as the origin of the litmus test)
+- A linked Notion page, "Memory Model", which is not a primary source. No ARM Architecture Reference Manual or other primary ARM source is cited.
 
 **C++ memory model and atomics**
 - C++ standard `[atomics.order]`; GCC `__atomic` Builtins documentation; LLVM *Atomic Instructions and Concurrency Guide* (`Task-4`)
@@ -474,13 +519,13 @@ Taken from the repository's documents; see each file for full citations.
 
 | Area | Status | Evidence |
 |---|---|---|
-| Phase 1 Research | 🟡 Partial | CPU execution, x86-64, MESI/MOESI, locks, ring buffer/Disruptor, methodology documented; no ARM/AArch64, CAS/ABA or wait-free material; five members' work not identifiable |
-| Race PoC | 🟡 Partial | Runnable store-buffering test (`Task-4`); lost-update race only as listings; relaxed vs release/acquire shows no failure |
+| Phase 1 Research | 🟡 Partial | CPU execution, x86-64, MESI/MOESI, locks, ring buffer/Disruptor, methodology documented; ARM/AArch64 as concepts only (`Task5`); no CAS/ABA or wait-free material; four members' work not identifiable |
+| Race PoC | ✅ Complete | Runnable store-buffering litmus test with raw data and figures (`Task5`) plus the `Task-4` stress test; lost-update race only as listings; `Task5` controls and hardware record missing |
 | False Sharing | ✅ Complete | `Task-7`: source, script, raw CSV (105 runs), summary, graph, environment, disassembly; VM caveats disclosed |
 | Lock-Free Construct | 🟡 Partial | SPSC ring buffer listing and reported results in a PDF only; no CAS loop; no executable source or tests |
-| Benchmarking | 🟡 Partial | `Task-7` complete; `task-8` data incomplete and inconsistent with its analysis; Task-10 numbers unverifiable; Task-11 standard not applied |
+| Benchmarking | 🟡 Partial | `Task-7` complete; `task-8` data incomplete and inconsistent with its analysis; Task-10 numbers unverifiable; `Task5` data committed but hardware unrecorded; Task-11 standard not applied |
 | KT | 🟡 Partial | Question checklist for Member 10; review notes for Member 4; no evidence for the rest |
-| Final Integration | 🔴 Missing | No consolidated report, no cross-member results; `Task-11` template empty; no top-level documentation before this README |
+| Final Integration | 🟡 Partial | Top-level README indexes every folder; no consolidated report or cross-member results; `Task-11` template empty |
 
 ---
 
