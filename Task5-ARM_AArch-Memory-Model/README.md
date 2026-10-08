@@ -141,20 +141,6 @@ This can give the CPU more freedom to optimize and improve performance, but it a
 | **RISC-V** | RVWMO | Weak |
 | **Power** | POWER memory model | Very weak |
 
-### Recommended Study Order for AArch64
-
-1. What memory ordering means
-2. Why CPUs reorder memory operations
-3. ARM weak memory ordering
-4. Program order vs observed order
-5. Load and store ordering
-6. DMB, DSB and ISB
-7. Acquire and Release
-8. LDAR and STLR
-9. RCsc vs RCpc
-10. ARM memory types: Normal and Device
-11. Shareability
-12. ARMv8/AArch64 formal memory model
 
 ## Visual Diagrams
 
