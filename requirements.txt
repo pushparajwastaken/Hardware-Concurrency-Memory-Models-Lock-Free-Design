@@ -1,0 +1,2 @@
+# Only needed for analyze.py
+matplotlib==3.10.8
