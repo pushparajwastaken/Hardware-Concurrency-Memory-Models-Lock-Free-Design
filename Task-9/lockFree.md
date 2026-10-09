@@ -64,7 +64,7 @@ The ABA problem is not a theoretical curiosity. It is documented in:
 - **SEI CERT CON09-C**: Industry coding standard with concrete examples.
 - **Intel SDM Vol. 3A, §8.2**: Hardware-level memory ordering context.
 
-My own ABA-safe implementation (`code/aba_demo.cpp`) uses tagged pointers and survives 4 threads x 100K operations without corruption. The naive version (without tags) crashes or livelocks under the same load.
+My own ABA-safe implementation (`abaDemo.cpp`) uses tagged pointers and survives 4 threads x 100K operations without corruption. The naive version (without tags) crashes or livelocks under the same load.
 
 ### Key Takeaway:
  Lock-free programming trades kernel context switches for CPU cycle burning. It is a precision tool for low-latency systems, not a default replacement for mutexes. And always, always add yield() or backoff to your spin loops when threads outnumber cores.
