@@ -315,7 +315,7 @@ Folders and commit messages use member numbers (`member-2`, `member-4`, "Member 
 | Preksha Wani | Not verifiable from repository. | Not verifiable from repository. | — |
 | Ananya Narula | Ring buffer, SPSC/MPSC/MPMC, LMAX Disruptor (PDF names the author; committed by Pushparaj) | Race demo, false-sharing and SPSC ring-buffer listings with reported results; KT checklist | [`Task-10/…Final_Report.pdf`](Task-10/Ring_Buffer_LMAX_Disruptor_Final_Report.pdf) |
 | Chhavi Sharma | Performance-engineering methodology, hardware-concurrency introduction | Benchmark template (header only); no benchmark data collected | [`Task-11/methodology/benchmark-methodology.md`](Task-11/methodology/benchmark-methodology.md) |
-| Richa Bharti | Not verifiable from repository. | Not verifiable from repository. | — |
+| Richa Bharti |  Evidence, documentation, and knowledge transfer | Project evidence organization, documentation of verified results, and knowledge-transfer materials | | Not verifiable from repository. | — |
 
 Four of twelve members (Khushi Kumari, Anand Kumar Sahni, Preksha Wani, Richa Bharti) have no identifiable contribution in the repository. This may reflect work stored elsewhere.
 
