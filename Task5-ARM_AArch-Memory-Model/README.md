@@ -1,8 +1,8 @@
-# Observing Memory Reordering on x86-64 and ARM (AArch64)
+# Observing Memory Reordering on ARM (AArch64)
 
-CPUs reorder memory operations. This repo catches it happening, first on an x86-64 PC and then on an AArch64 Android phone. It also shows which C++ memory orders and fences stop it.
+CPUs reorder memory operations. This repo catches it happening on an AArch64 Android phone. It also shows which C++ memory orders and fences stop it.
 
-It starts from Jeff Preshing's *Memory Reordering Caught in the Act*. That test got data logging and plotting. On top of it come ARM litmus tests (SB, MP, LB) and a file of tiny atomic functions for reading the assembly.
+It builds on the idea in Jeff Preshing's *Memory Reordering Caught in the Act*, with ARM litmus tests (SB, MP, LB) and a file of tiny atomic functions for reading the assembly.
 
 ---
 
@@ -10,8 +10,6 @@ It starts from Jeff Preshing's *Memory Reordering Caught in the Act*. That test 
 
 | File | Purpose |
 |---|---|
-| `ordering_pinned.cpp` | Original x86 store-buffering test, extended with 1M-run logging, a warm-up phase and thread pinning |
-| `plot_reorders.py` | Plots the x86 data: cumulative reorders vs runs and reorders per second (single data set) |
 | `plot_litmus.py` | Plots the ARM litmus results for several CPU pairs on shared graphs, plus summary comparison graphs |
 | `arm-litmus.cpp` | ARM litmus tests: SB, MP, LB, each with several memory orders and fences |
 | `arm-atomics.cpp` | One tiny function per atomic operation, for reading the assembly |
@@ -19,7 +17,7 @@ It starts from Jeff Preshing's *Memory Reordering Caught in the Act*. That test 
 | `arm-atomics-lse.s` | AArch64 assembly with `-march=armv8.1-a` (LSE atomics) |
 | `arm_memory_model.md` | Short notes on what a memory model is and how ARM compares with x86 |
 | `litmus_results/` | Raw ARM litmus data: `summary.txt` plus one folder per CPU pair (`cpu0-1`, `cpu6-7`, `cpu0-7`) |
-| `plots/` | Generated figures (see [section 6](#6-results-by-cpu-pair-pinned-runs)) |
+| `plots/` | Generated figures (see [section 5](#5-results-by-cpu-pair-pinned-runs)) |
 
 ---
 
@@ -29,26 +27,24 @@ All ARM results come from this phone:
 
 | | |
 |---|---|
-| Hardware model | RMX5110 |
-| SoC | MediaTek Dimensity 8400 Ultra 5G (4 nm) |
-| CPU | 8x Cortex-A725 (ARMv9.2-A): 1 at 3.25 GHz, 3 at 3.0 GHz, 4 at 2.1 GHz |
-| GPU | Mali-G720 MC7 |
+| SoC | MediaTek Dimensity 7400 Ultra 5G (4 nm) |
+| CPU | Octa-core (8 cores / 8 threads), up to 2.6 GHz: 4x Cortex-A78 at 2.6 GHz + 4x Cortex-A55 at 2.0 GHz (ARMv8.2-A) |
+| GPU | Arm Mali-G615 MP2 |
 | RAM | 6 GB |
 | OS / shell | Android, Termux |
 | Compiler | `clang++ -O2 -std=c++17 -pthread` |
 
-ARMv9.2-A includes everything in ARMv8, so the ARMv8 memory model discussed here applies.
-All eight cores are the same Cortex-A725 design. They differ only in clock speed and cache
-setup, so "slow pair" and "fast pair" below means clock tiers, not little vs big cores.
-Chip details from [91mobiles](https://www.91mobiles.com/processor/mediatek-dimensity-8400-ultra-pdp).
+Cortex-A78 and Cortex-A55 both implement ARMv8.2-A, so the ARMv8 memory model discussed here applies directly.
+The chip is a big.LITTLE design: four big Cortex-A78 cores and four little Cortex-A55 cores. On most phones the
+A55 cores are CPUs 0 to 3 and the A78 cores are CPUs 4 to 7. That would make CPUs 0 & 1 a little-to-little pair,
+CPUs 6 & 7 a big-to-big pair and CPUs 0 & 7 a cross-cluster pair.
+Check the numbering on your own device with the command below.
 
 To see which CPU numbers sit in which clock tier on your own device:
 
 ```
 for c in /sys/devices/system/cpu/cpu[0-7]; do echo "$(basename $c) $(cat $c/cpufreq/cpuinfo_max_freq)"; done
 ```
-
-The x86 test in section 2 ran on a Windows PC (MSYS2 UCRT64). Its CPU details are not recorded here yet.
 
 ---
 
@@ -65,7 +61,7 @@ A CPU or compiler can reorder memory operations as long as a single thread can't
 | Store → Load reordering | **Yes** | **Yes** |
 | Store atomicity | Multicopy atomic | Multicopy atomic since the ARMv8 revision (older ARM was not) |
 
-x86 only reorders **Store → Load**. The cause is the store buffer, and the original program detects exactly that. ARM allows all four combinations. Code that works on x86 by accident can break on ARM.
+x86 only reorders **Store → Load**. The cause is the store buffer. ARM allows all four combinations. Code that works on x86 by accident can break on ARM.
 
 ARM has a formal concurrency model. The architecture was revised to be multicopy atomic, and a formal model was added to the spec (Pulte et al., POPL 2018, see References).
 
@@ -92,47 +88,7 @@ Notes from the generated assembly:
 
 ---
 
-## 2. Part 1: x86-64 store-buffering test
-
-Two threads each run a store followed by a load on the other thread's variable:
-
-```
-Thread 1:  X = 1;  r1 = Y;
-Thread 2:  Y = 1;  r2 = X;
-```
-
-If `r1 == 0 && r2 == 0`, both loads finished before either store became visible. That is a Store → Load reorder. Sequential consistency makes this outcome impossible.
-
-Changes to the original program:
-
-- Stop after 1,000,000 runs, logging data in memory and writing it at the end.
-- `reorders_vs_runs.txt`: cumulative reorders, sampled every 1,000 runs.
-- `reorders_per_second.txt`: reorders and runs in each second of runtime.
-- A **warm-up phase** (200,000 uncounted runs) so cold caches, frequency ramp-up and thread migration don't skew the first second.
-- **Thread pinning** (`SetThreadAffinityMask` on Windows) with configurable cores.
-- `USE_CPU_FENCE 1` (`mfence`) removes the reorders, as expected.
-
-Build on Windows (MSYS2 UCRT64) with `g++`, not `gcc`. The code uses `std::vector`:
-
-```
-g++ -O2 -o ordering.exe ordering_pinned.cpp -lpthread
-python plot_reorders.py
-```
-
-### Initial run (before warm-up and pinning)
-
-| Metric | Value |
-|---|---|
-| Total runs | 1,000,000 |
-| Total reorders | about 1,520 (about 0.15% of runs) |
-| Mean reorders per second | 126.5 over 12 seconds |
-| First second | about 306 reorders, then it settled around 60 to 190 |
-
-The first-second spike is why the warm-up phase and pinning exist. Graph 1 plots the cumulative curve against fitted linear and log reference curves, plus a log-log view.
-
----
-
-## 3. Part 2: ARM litmus tests
+## 2. ARM litmus tests
 
 `arm-litmus.cpp` runs three classic tests. Each has two threads, a spin barrier to start them together, and a random start offset (0 to 127 nop steps) to try different alignments. Each run records `(r0, r1)`. The **weak outcome** is the one sequentially consistent execution can never produce.
 
@@ -214,9 +170,9 @@ g++ -O2 -S -march=armv8.1-a arm-atomics.cpp -o arm-atomics-lse.s
 
 ---
 
-## 4. Terminal output
+## 3. Terminal output
 
-Device: the RMX5110 phone from [Test environment](#test-environment), 8 hardware threads, no pinning, 2,000,000 iterations per test.
+Device: the phone from [Test environment](#test-environment), 8 hardware threads, no pinning, 2,000,000 iterations per test.
 
 ```
 Architecture: AArch64, hardware threads: 8, iterations per test: 2000000
@@ -266,7 +222,7 @@ LB store-release         [ldr; stlr]
 
 ---
 
-## 5. Results (unpinned run)
+## 4. Results (unpinned run)
 
 Counts are out of 2,000,000 iterations per test. The weak outcome is marked with `*`.
 
@@ -302,7 +258,7 @@ Counts are out of 2,000,000 iterations per test. The weak outcome is marked with
 
 ---
 
-## 6. Results by CPU pair (pinned runs)
+## 5. Results by CPU pair (pinned runs)
 
 Same tests, but the two threads are pinned to specific CPUs. 2,000,000 iterations per test, per pair. 🟥 means the weak (reordered) outcome was seen. 🟩 means never seen. Raw data is in [`litmus_results/`](litmus_results/). Figures are in [`plots/`](plots/), made by `plot_litmus.py`.
 
@@ -416,7 +372,7 @@ Both LB variants are empty on all pairs. Same as the unpinned run.
 
 ---
 
-## 7. Analysis
+## 6. Analysis
 
 - **SB relaxed (20.7%).** Plain `str` then `ldr`. The load finishes before the store is visible. Same Store → Load reordering as x86.
 - **SB with `stlr`/`ldar` is clean.** ARMv8 hardware orders a release store before a later acquire load. That is stricter than C++ requires. `dmb ish` forbids the outcome outright.
@@ -433,9 +389,9 @@ In SB relaxed, almost all non-weak runs land in `(0,1)` (about 1.58M) and almost
 
 ---
 
-## 8. Caveats
+## 7. Caveats
 
-- **Only three CPU pairs.** Section 6 pins to CPUs 0 & 1, 6 & 7 and 0 & 7. Section 5 is the older unpinned run, so don't compare the two directly. Android may refuse affinity changes. Then the program prints a warning and runs unpinned.
+- **Only three CPU pairs.** Section 5 pins to CPUs 0 & 1, 6 & 7 and 0 & 7. Section 4 is the older unpinned run, so don't compare the two directly. Android may refuse affinity changes. Then the program prints a warning and runs unpinned.
 - **Empirical only.** "Not observed" is what this chip did in these runs. It is not what the architecture forbids. For that, use the formal model tool [rmem](https://www.cl.cam.ac.uk/~sf502/regressions/rmem/). It needs the tests written as AArch64 assembly litmus files.
 - **Asymmetric start.** The harness skews which thread starts first, as described above.
 - **Run-to-run variation.** Temperature, background load and frequency scaling change the results. Repeat runs before comparing small differences.
