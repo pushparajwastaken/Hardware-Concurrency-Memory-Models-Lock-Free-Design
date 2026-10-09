@@ -1,0 +1,4 @@
+# test MP only writer release total_runtime_sec 1.073 total_runs 2000000 total_reorders 79 cpus 0,1
+# second reorders runs_in_that_second
+1 79 1862144
+2 0 137856

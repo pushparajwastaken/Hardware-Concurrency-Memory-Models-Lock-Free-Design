@@ -1,0 +1,4 @@
+# test MP release/acquire total_runtime_sec 1.281 total_runs 2000000 total_reorders 0 cpus 0,1
+# second reorders runs_in_that_second
+1 0 1567744
+2 0 432256
