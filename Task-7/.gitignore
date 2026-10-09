@@ -1,0 +1,10 @@
+# build outputs
+/false-sharing
+/*/false-sharing
+*.o
+*.exe
+*.perf.data
+*.perf.data.old
+.venv/
+__pycache__/
+*.pyc

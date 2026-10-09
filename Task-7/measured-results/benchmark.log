@@ -1,0 +1,180 @@
+compiler=13.3.0 cache_line_bytes=64 atomic_size=8 padded_stride=64 allowed_cpus=0;1;2;3;4;5;6;7;8 seed=20261008
+Timing excludes construction/join, includes gate wakeup and end timestamp.
+Warmup: min(iterations,200000) for each mode/count.
+layout mode=packed threads=1 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=padded threads=1 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=true_shared threads=1 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=packed threads=2 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=packed threads=2 worker=1 cpu=1 offset_bytes=8 line_group=0
+layout mode=padded threads=2 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=padded threads=2 worker=1 cpu=1 offset_bytes=64 line_group=1
+layout mode=true_shared threads=2 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=true_shared threads=2 worker=1 cpu=1 offset_bytes=0 line_group=0
+layout mode=packed threads=4 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=packed threads=4 worker=1 cpu=1 offset_bytes=8 line_group=0
+layout mode=packed threads=4 worker=2 cpu=2 offset_bytes=16 line_group=0
+layout mode=packed threads=4 worker=3 cpu=3 offset_bytes=24 line_group=0
+layout mode=padded threads=4 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=padded threads=4 worker=1 cpu=1 offset_bytes=64 line_group=1
+layout mode=padded threads=4 worker=2 cpu=2 offset_bytes=128 line_group=2
+layout mode=padded threads=4 worker=3 cpu=3 offset_bytes=192 line_group=3
+layout mode=true_shared threads=4 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=true_shared threads=4 worker=1 cpu=1 offset_bytes=0 line_group=0
+layout mode=true_shared threads=4 worker=2 cpu=2 offset_bytes=0 line_group=0
+layout mode=true_shared threads=4 worker=3 cpu=3 offset_bytes=0 line_group=0
+layout mode=packed threads=8 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=packed threads=8 worker=1 cpu=1 offset_bytes=8 line_group=0
+layout mode=packed threads=8 worker=2 cpu=2 offset_bytes=16 line_group=0
+layout mode=packed threads=8 worker=3 cpu=3 offset_bytes=24 line_group=0
+layout mode=packed threads=8 worker=4 cpu=4 offset_bytes=32 line_group=0
+layout mode=packed threads=8 worker=5 cpu=5 offset_bytes=40 line_group=0
+layout mode=packed threads=8 worker=6 cpu=6 offset_bytes=48 line_group=0
+layout mode=packed threads=8 worker=7 cpu=7 offset_bytes=56 line_group=0
+layout mode=padded threads=8 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=padded threads=8 worker=1 cpu=1 offset_bytes=64 line_group=1
+layout mode=padded threads=8 worker=2 cpu=2 offset_bytes=128 line_group=2
+layout mode=padded threads=8 worker=3 cpu=3 offset_bytes=192 line_group=3
+layout mode=padded threads=8 worker=4 cpu=4 offset_bytes=256 line_group=4
+layout mode=padded threads=8 worker=5 cpu=5 offset_bytes=320 line_group=5
+layout mode=padded threads=8 worker=6 cpu=6 offset_bytes=384 line_group=6
+layout mode=padded threads=8 worker=7 cpu=7 offset_bytes=448 line_group=7
+layout mode=true_shared threads=8 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=true_shared threads=8 worker=1 cpu=1 offset_bytes=0 line_group=0
+layout mode=true_shared threads=8 worker=2 cpu=2 offset_bytes=0 line_group=0
+layout mode=true_shared threads=8 worker=3 cpu=3 offset_bytes=0 line_group=0
+layout mode=true_shared threads=8 worker=4 cpu=4 offset_bytes=0 line_group=0
+layout mode=true_shared threads=8 worker=5 cpu=5 offset_bytes=0 line_group=0
+layout mode=true_shared threads=8 worker=6 cpu=6 offset_bytes=0 line_group=0
+layout mode=true_shared threads=8 worker=7 cpu=7 offset_bytes=0 line_group=0
+layout mode=packed threads=9 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=packed threads=9 worker=1 cpu=1 offset_bytes=8 line_group=0
+layout mode=packed threads=9 worker=2 cpu=2 offset_bytes=16 line_group=0
+layout mode=packed threads=9 worker=3 cpu=3 offset_bytes=24 line_group=0
+layout mode=packed threads=9 worker=4 cpu=4 offset_bytes=32 line_group=0
+layout mode=packed threads=9 worker=5 cpu=5 offset_bytes=40 line_group=0
+layout mode=packed threads=9 worker=6 cpu=6 offset_bytes=48 line_group=0
+layout mode=packed threads=9 worker=7 cpu=7 offset_bytes=56 line_group=0
+layout mode=packed threads=9 worker=8 cpu=8 offset_bytes=64 line_group=1
+layout mode=padded threads=9 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=padded threads=9 worker=1 cpu=1 offset_bytes=64 line_group=1
+layout mode=padded threads=9 worker=2 cpu=2 offset_bytes=128 line_group=2
+layout mode=padded threads=9 worker=3 cpu=3 offset_bytes=192 line_group=3
+layout mode=padded threads=9 worker=4 cpu=4 offset_bytes=256 line_group=4
+layout mode=padded threads=9 worker=5 cpu=5 offset_bytes=320 line_group=5
+layout mode=padded threads=9 worker=6 cpu=6 offset_bytes=384 line_group=6
+layout mode=padded threads=9 worker=7 cpu=7 offset_bytes=448 line_group=7
+layout mode=padded threads=9 worker=8 cpu=8 offset_bytes=512 line_group=8
+layout mode=true_shared threads=9 worker=0 cpu=0 offset_bytes=0 line_group=0
+layout mode=true_shared threads=9 worker=1 cpu=1 offset_bytes=0 line_group=0
+layout mode=true_shared threads=9 worker=2 cpu=2 offset_bytes=0 line_group=0
+layout mode=true_shared threads=9 worker=3 cpu=3 offset_bytes=0 line_group=0
+layout mode=true_shared threads=9 worker=4 cpu=4 offset_bytes=0 line_group=0
+layout mode=true_shared threads=9 worker=5 cpu=5 offset_bytes=0 line_group=0
+layout mode=true_shared threads=9 worker=6 cpu=6 offset_bytes=0 line_group=0
+layout mode=true_shared threads=9 worker=7 cpu=7 offset_bytes=0 line_group=0
+layout mode=true_shared threads=9 worker=8 cpu=8 offset_bytes=0 line_group=0
+completed 1/105 mode=packed threads=4 seconds=0.64838
+completed 2/105 mode=true_shared threads=2 seconds=0.160375
+completed 3/105 mode=padded threads=1 seconds=0.0826597
+completed 4/105 mode=padded threads=8 seconds=0.348724
+completed 5/105 mode=true_shared threads=8 seconds=1.87169
+completed 6/105 mode=packed threads=8 seconds=1.8868
+completed 7/105 mode=true_shared threads=1 seconds=0.0881821
+completed 8/105 mode=packed threads=1 seconds=0.0734446
+completed 9/105 mode=true_shared threads=9 seconds=2.16568
+completed 10/105 mode=padded threads=2 seconds=0.186184
+completed 11/105 mode=packed threads=9 seconds=1.89636
+completed 12/105 mode=padded threads=9 seconds=0.17991
+completed 13/105 mode=packed threads=2 seconds=0.162295
+completed 14/105 mode=padded threads=4 seconds=0.175296
+completed 15/105 mode=true_shared threads=4 seconds=0.529721
+completed 16/105 mode=true_shared threads=9 seconds=2.50087
+completed 17/105 mode=packed threads=2 seconds=0.182561
+completed 18/105 mode=true_shared threads=8 seconds=1.85017
+completed 19/105 mode=padded threads=8 seconds=0.193721
+completed 20/105 mode=padded threads=9 seconds=0.181567
+completed 21/105 mode=packed threads=4 seconds=0.636353
+completed 22/105 mode=padded threads=2 seconds=0.179582
+completed 23/105 mode=true_shared threads=1 seconds=0.0753692
+completed 24/105 mode=true_shared threads=2 seconds=0.16533
+completed 25/105 mode=padded threads=4 seconds=0.173802
+completed 26/105 mode=packed threads=8 seconds=1.90023
+completed 27/105 mode=true_shared threads=4 seconds=0.611311
+completed 28/105 mode=packed threads=9 seconds=1.87674
+completed 29/105 mode=packed threads=1 seconds=0.0696752
+completed 30/105 mode=padded threads=1 seconds=0.0769629
+completed 31/105 mode=packed threads=9 seconds=1.81393
+completed 32/105 mode=true_shared threads=1 seconds=0.072538
+completed 33/105 mode=true_shared threads=4 seconds=0.515018
+completed 34/105 mode=packed threads=2 seconds=0.158969
+completed 35/105 mode=padded threads=1 seconds=0.0754527
+completed 36/105 mode=true_shared threads=9 seconds=2.1372
+completed 37/105 mode=padded threads=8 seconds=0.17932
+completed 38/105 mode=true_shared threads=2 seconds=0.157909
+completed 39/105 mode=padded threads=4 seconds=0.177074
+completed 40/105 mode=packed threads=8 seconds=1.887
+completed 41/105 mode=padded threads=9 seconds=0.18207
+completed 42/105 mode=packed threads=1 seconds=0.0765512
+completed 43/105 mode=true_shared threads=8 seconds=2.00467
+completed 44/105 mode=packed threads=4 seconds=0.609812
+completed 45/105 mode=padded threads=2 seconds=0.17186
+completed 46/105 mode=true_shared threads=8 seconds=1.82827
+completed 47/105 mode=packed threads=8 seconds=1.84431
+completed 48/105 mode=packed threads=9 seconds=1.82294
+completed 49/105 mode=true_shared threads=1 seconds=0.0742291
+completed 50/105 mode=padded threads=2 seconds=0.174538
+completed 51/105 mode=padded threads=1 seconds=0.0658899
+completed 52/105 mode=packed threads=1 seconds=0.0758038
+completed 53/105 mode=true_shared threads=2 seconds=0.168779
+completed 54/105 mode=padded threads=8 seconds=0.18134
+completed 55/105 mode=packed threads=4 seconds=0.603646
+completed 56/105 mode=true_shared threads=9 seconds=2.06392
+completed 57/105 mode=padded threads=9 seconds=0.492247
+completed 58/105 mode=packed threads=2 seconds=0.221926
+completed 59/105 mode=true_shared threads=4 seconds=0.531321
+completed 60/105 mode=padded threads=4 seconds=0.167377
+completed 61/105 mode=true_shared threads=4 seconds=0.763546
+completed 62/105 mode=packed threads=8 seconds=1.65488
+completed 63/105 mode=true_shared threads=2 seconds=0.166057
+completed 64/105 mode=packed threads=4 seconds=0.61979
+completed 65/105 mode=padded threads=1 seconds=0.0761092
+completed 66/105 mode=padded threads=8 seconds=0.18323
+completed 67/105 mode=packed threads=2 seconds=0.153723
+completed 68/105 mode=padded threads=4 seconds=0.525534
+completed 69/105 mode=true_shared threads=1 seconds=0.0925593
+completed 70/105 mode=padded threads=9 seconds=0.611841
+completed 71/105 mode=true_shared threads=9 seconds=2.13432
+completed 72/105 mode=padded threads=2 seconds=0.181405
+completed 73/105 mode=true_shared threads=8 seconds=1.65958
+completed 74/105 mode=packed threads=1 seconds=0.0746466
+completed 75/105 mode=packed threads=9 seconds=1.78059
+completed 76/105 mode=packed threads=4 seconds=0.605658
+completed 77/105 mode=padded threads=2 seconds=0.221745
+completed 78/105 mode=true_shared threads=8 seconds=1.72165
+completed 79/105 mode=packed threads=2 seconds=0.163839
+completed 80/105 mode=padded threads=4 seconds=0.176239
+completed 81/105 mode=packed threads=8 seconds=1.66724
+completed 82/105 mode=packed threads=9 seconds=1.69921
+completed 83/105 mode=true_shared threads=2 seconds=0.161961
+completed 84/105 mode=true_shared threads=1 seconds=0.078921
+completed 85/105 mode=true_shared threads=4 seconds=0.617835
+completed 86/105 mode=padded threads=1 seconds=0.0696823
+completed 87/105 mode=padded threads=8 seconds=0.201528
+completed 88/105 mode=padded threads=9 seconds=0.230671
+completed 89/105 mode=true_shared threads=9 seconds=2.02388
+completed 90/105 mode=packed threads=1 seconds=0.0719542
+completed 91/105 mode=padded threads=8 seconds=0.191784
+completed 92/105 mode=packed threads=1 seconds=0.0698482
+completed 93/105 mode=packed threads=8 seconds=1.76573
+completed 94/105 mode=padded threads=1 seconds=0.0775301
+completed 95/105 mode=padded threads=9 seconds=0.204847
+completed 96/105 mode=padded threads=4 seconds=0.178948
+completed 97/105 mode=true_shared threads=2 seconds=0.156453
+completed 98/105 mode=packed threads=9 seconds=1.78462
+completed 99/105 mode=true_shared threads=1 seconds=0.0698121
+completed 100/105 mode=true_shared threads=8 seconds=1.70264
+completed 101/105 mode=true_shared threads=9 seconds=1.98157
+completed 102/105 mode=packed threads=2 seconds=0.155122
+completed 103/105 mode=padded threads=2 seconds=0.282902
+completed 104/105 mode=packed threads=4 seconds=0.617022
+completed 105/105 mode=true_shared threads=4 seconds=0.610032

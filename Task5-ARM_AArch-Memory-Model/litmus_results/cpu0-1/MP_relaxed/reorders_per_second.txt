@@ -1,0 +1,4 @@
+# test MP relaxed total_runtime_sec 1.046 total_runs 2000000 total_reorders 11306 cpus 0,1
+# second reorders runs_in_that_second
+1 10918 1933056
+2 388 66944

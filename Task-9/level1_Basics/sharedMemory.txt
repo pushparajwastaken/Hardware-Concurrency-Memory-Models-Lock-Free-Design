@@ -1,0 +1,10 @@
+                               SHARED MEMORY MIND MAP
+
+┌─────────────────────────────────────────┐
+│            PROCESS ADDRESS SPACE        │
+├──────────────┬──────────────┬───────────┤
+│  Thread 1    │  Thread 2    │  Thread 3 │
+│  Stack       │  Stack       │  Stack    │  ← Private (local vars)
+├──────────────┴──────────────┴───────────┤
+│              HEAP (malloc/new)          │  ← SHARED
+└─────────────────────────────────────────┘

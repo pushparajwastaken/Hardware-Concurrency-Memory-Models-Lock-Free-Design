@@ -1,0 +1,15 @@
+Command: objdump -d -C measured-results/false-sharing
+Observed benchmark loop (all modes share this code):
+
+    72f4:	31 c0                	xor    %eax,%eax
+    72f6:	48 83 3a 00          	cmpq   $0x0,(%rdx)
+    72fa:	74 1a                	je     7316 <std::thread::_State_impl<std::thread::_Invoker<std::tuple<run(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int, unsigned long, std::vector<int, std::allocator<int> > const&, bool)::{lambda()#1}> > >::_M_run()+0x106>
+    72fc:	0f 1f 40 00          	nopl   0x0(%rax)
+    7300:	48 8b 53 10          	mov    0x10(%rbx),%rdx
+    7304:	f0 48 83 02 01       	lock addq $0x1,(%rdx)
+    7309:	48 8b 53 38          	mov    0x38(%rbx),%rdx
+    730d:	48 83 c0 01          	add    $0x1,%rax
+    7311:	48 3b 02             	cmp    (%rdx),%rax
+    7314:	72 ea                	jb     7300 <std::thread::_State_impl<std::thread::_Invoker<std::tuple<run(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, int, unsigned long, std::vector<int, std::allocator<int> > const&, bool)::{lambda()#1}> > >::_M_run()+0xf0>
+    7316:	e8 45 c4 ff ff       	call   3760 <std::chrono::_V2::steady_clock::now()@plt>
+    731b:	48 8b 4b 20          	mov    0x20(%rbx),%rcx

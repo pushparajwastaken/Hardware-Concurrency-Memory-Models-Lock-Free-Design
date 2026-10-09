@@ -1,0 +1,4 @@
+# test LB relaxed total_runtime_sec 1.041 total_runs 2000000 total_reorders 0 cpus 0,1
+# second reorders runs_in_that_second
+1 0 1931008
+2 0 68992
