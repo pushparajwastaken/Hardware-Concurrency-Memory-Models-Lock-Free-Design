@@ -1,0 +1,19 @@
+[Thread 1]                     [Shared Memory X]                 [Thread 2]
+    |                                  |                              |
+    |--- Read X = 100 ---------------->|                              |
+    |                                  |                              |
+    |    (Preempted / Sleep)           |                              |
+    |                                  |<--- Read X = 100 ------------|
+    |                                  |--- CAS(100 -> 200) Success -->|
+    |                                  |                              |
+    |                                  |<--- Do Critical Work --------|
+    |                                  |--- CAS(200 -> 100) Success -->|
+    |                                  |                              |
+    |--- CAS(100 -> 150) Success ----->|                              |
+    |                                  |                              |
+    |  ^^^ T1 thinks X is still 100!   |                              |
+    |      But X became 200 and back.  |                              |
+    |      T1's CAS succeeds falsely.  |                              |
+
+
+ 
