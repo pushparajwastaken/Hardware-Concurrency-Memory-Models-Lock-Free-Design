@@ -17,8 +17,38 @@ It starts from Jeff Preshing's *Memory Reordering Caught in the Act*. That test 
 | `arm-atomics.cpp` | One tiny function per atomic operation, for reading the assembly |
 | `arm-atomics.s` | AArch64 assembly (ARMv8.0, GCC 13) |
 | `arm-atomics-lse.s` | AArch64 assembly with `-march=armv8.1-a` (LSE atomics) |
+| `arm_memory_model.md` | Short notes on what a memory model is and how ARM compares with x86 |
 | `litmus_results/` | Raw ARM litmus data: `summary.txt` plus one folder per CPU pair (`cpu0-1`, `cpu6-7`, `cpu0-7`) |
 | `plots/` | Generated figures (see [section 6](#6-results-by-cpu-pair-pinned-runs)) |
+
+---
+
+## Test environment
+
+All ARM results come from this phone:
+
+| | |
+|---|---|
+| Hardware model | RMX5110 |
+| SoC | MediaTek Dimensity 8400 Ultra 5G (4 nm) |
+| CPU | 8x Cortex-A725 (ARMv9.2-A): 1 at 3.25 GHz, 3 at 3.0 GHz, 4 at 2.1 GHz |
+| GPU | Mali-G720 MC7 |
+| RAM | 6 GB |
+| OS / shell | Android, Termux |
+| Compiler | `clang++ -O2 -std=c++17 -pthread` |
+
+ARMv9.2-A includes everything in ARMv8, so the ARMv8 memory model discussed here applies.
+All eight cores are the same Cortex-A725 design. They differ only in clock speed and cache
+setup, so "slow pair" and "fast pair" below means clock tiers, not little vs big cores.
+Chip details from [91mobiles](https://www.91mobiles.com/processor/mediatek-dimensity-8400-ultra-pdp).
+
+To see which CPU numbers sit in which clock tier on your own device:
+
+```
+for c in /sys/devices/system/cpu/cpu[0-7]; do echo "$(basename $c) $(cat $c/cpufreq/cpuinfo_max_freq)"; done
+```
+
+The x86 test in section 2 ran on a Windows PC (MSYS2 UCRT64). Its CPU details are not recorded here yet.
 
 ---
 
@@ -186,7 +216,7 @@ g++ -O2 -S -march=armv8.1-a arm-atomics.cpp -o arm-atomics-lse.s
 
 ## 4. Terminal output
 
-Device: AArch64 Android phone, 8 hardware threads, no pinning, 2,000,000 iterations per test.
+Device: the RMX5110 phone from [Test environment](#test-environment), 8 hardware threads, no pinning, 2,000,000 iterations per test.
 
 ```
 Architecture: AArch64, hardware threads: 8, iterations per test: 2000000
