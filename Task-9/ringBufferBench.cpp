@@ -9,6 +9,7 @@
 #include <fstream>
 #include "lockFreeRingBuffer.hpp"
 
+std::atomic<long long> sink{0};
 const int OPERATIONS = 1000000;
 const int QUEUE_SIZE = 1024;
 
@@ -30,7 +31,9 @@ void mutex_consumer() {
     for (int i = 0; i < OPERATIONS; ++i) {
         std::unique_lock<std::mutex> lock(mtx);
         while (mutex_queue.empty()) cv.wait(lock);
+        int val = mutex_queue.front();
         mutex_queue.pop();
+        sink.fetch_add(val, std::memory_order_relaxed); 
         cv.notify_one();
     }
 }
@@ -73,6 +76,7 @@ int main() {
         int val;
         for (int i = 0; i < OPERATIONS; ++i) {
             while (!lf_queue.pop(val)) { std::this_thread::yield(); }
+             sink.fetch_add(val, std::memory_order_relaxed); 
         }
     };
 

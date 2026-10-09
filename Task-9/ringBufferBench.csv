@@ -1,3 +1,3 @@
 Mode,Time_ms,Throughput_ops_sec,Avg_Latency_ns
-Mutex,351,5698005,175.5
-Lock-Free SPSC,8,250000000,4
+Mutex,386,5181347,193
+Lock-Free SPSC,35,57142857,17.5

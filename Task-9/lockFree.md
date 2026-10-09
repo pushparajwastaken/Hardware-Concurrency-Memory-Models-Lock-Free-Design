@@ -55,6 +55,15 @@ if (current_head == tail_.load(std::memory_order_acquire)) {
     return false;
 }
 ```
+### Debugging Note: The Compiler Optimization Trap
+
+My benchmark initially showed a **43.87x improvement** (250M ops/sec, 4 ns/op). These numbers were suspiciously high. I investigated and discovered that the compiler had **optimized away the entire consumer loop** because the popped value was never used. With `-O2`, the compiler deduced that the loop had no observable side effects and eliminated it entirely.
+
+**The Fix:** I introduced an atomic `sink` variable and added `sink.fetch_add(val, std::memory_order_relaxed)` after every pop. This forced the compiler to keep the loop, since the value was now being consumed.
+
+**After fix:** The realistic numbers are **11.02x improvement** (57.1M ops/sec, 17.5 ns/op). This is honest, reproducible, and reflects the true performance benefit of lock-free synchronization over mutex-based queues.
+
+**Lesson Learned:** In benchmarking, always verify that the compiler is not optimizing away your test loop. This is a common pitfall in C++ benchmarking, and one of the reasons tools like Google Benchmark exist.
 
 ### ABA References
 

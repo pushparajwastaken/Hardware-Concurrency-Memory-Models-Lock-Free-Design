@@ -8,11 +8,10 @@ The core value of this repository is the empirical proof of lock-free performanc
 
 
 ## 🚀 Key Empirical Findings
-
 | Metric | Mutex-Based Queue | Lock-Free SPSC Ring Buffer | Improvement |
 | :--- | :--- | :--- | :--- |
-| **Throughput** | 4,024,144 ops/sec | 13,157,894 ops/sec | **3.27x** |
-| **Avg Latency** | 248.5 ns/op | 76.0 ns/op | **3.27x** |
+| **Throughput** | 5,181,347 ops/sec | 57,142,857 ops/sec | **11.02x** |
+| **Avg Latency** | 193.0 ns/op | 17.5 ns/op | **11.02x** |
 | **Cache Misses (No Padding)** | ~12.4M | ~12.4M | Baseline |
 | **Cache Misses (With Padding)** | ~3.1M | ~3.1M | **75% reduction** |
 
