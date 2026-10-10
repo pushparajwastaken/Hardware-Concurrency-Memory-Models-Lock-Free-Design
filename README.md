@@ -27,7 +27,7 @@ This page is a navigation hub. It states what exists and how much evidence stand
 | Understand the basics first | [`Task1/Hardware_Concurrency_Research1.docx`](Task1/Hardware_Concurrency_Research1.docx) and the [concept map](Task1/Concurrency_Concept_Map.png) |
 | Check which claims are actually supported | [`Task-12/evidence-matrix.md`](Task-12/evidence-matrix.md) (note: written before some later work, see [findings §5.4](docs/project-findings.md#54-team-knowledge-transfer)) |
 | Read every caveat and limitation | [`docs/project-findings.md`](docs/project-findings.md) |
-| See the repository audit and proposed clean-up | [`docs/repo-audit.md`](docs/repo-audit.md) |
+
 
 Headline results, each from committed data with caveats in the linked pages:
 
